@@ -23,8 +23,10 @@ function gotHands(results) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  // 擷取攝影機並設定水平翻轉
-  capture = createCapture(VIDEO, { flipped: true });
+  // 使用最簡單的 VIDEO 模式以確保相容性，避免 Requested device not found 錯誤
+  capture = createCapture(VIDEO, (stream) => {
+    console.log("攝影機已成功啟動");
+  });
   capture.hide();
 
   // 開始偵測手部
