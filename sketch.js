@@ -13,15 +13,18 @@ function draw() {
   // 設定背景顏色為 e7c6ff
   background('#e7c6ff');
 
-  push();
-  // 1. 將座標原點移至畫布中心
-  translate(width / 2, height / 2);
-  // 2. 進行水平翻轉 (左右顛倒)
-  scale(-1, 1);
-  // 3. 設定影像繪製模式為中心，並縮放至全螢幕的 50%
-  imageMode(CENTER);
-  image(capture, 0, 0, width * 0.5, height * 0.5);
-  pop();
+  // 檢查攝影機是否已準備好並獲取到影像寬高
+  if (capture.loadedmetadata) {
+    push();
+    // 1. 將座標原點移至畫布中心
+    translate(width / 2, height / 2);
+    // 2. 進行水平翻轉 (左右顛倒)
+    scale(-1, 1);
+    // 3. 設定影像繪製模式為中心，並縮放至全螢幕的 50%
+    imageMode(CENTER);
+    image(capture, 0, 0, width * 0.5, height * 0.5);
+    pop();
+  }
 }
 
 function windowResized() {
