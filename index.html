@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -8,7 +11,8 @@
   <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
 
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
       overflow: hidden;
       background: #0f172a;
@@ -42,10 +46,10 @@
       width: 320px;
       padding: 20px;
 
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
 
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 24px;
 
       color: white;
@@ -55,19 +59,325 @@
     }
   </style>
 </head>
+
 <body>
 
-  <div class="title">HandPose Rock Paper Scissors</div>
+  <div class="title">
+    HandPose Rock Paper Scissors
+  </div>
 
   <div class="panel">
-    用手勢出拳：
+    用手勢出拳
     <br><br>
+
     ✊ 石頭
+    <br>
+
     ✌️ 剪刀
+    <br>
+
     ✋ 布
   </div>
 
-  <script src="sketch.js"></script>
+  <script>
+
+    let capture;
+    let handPose;
+    let hands = [];
+
+    const connections = [
+      [0, 1], [1, 2], [2, 3], [3, 4],
+      [0, 5], [5, 6], [6, 7], [7, 8],
+      [0, 9], [9, 10], [10, 11], [11, 12],
+      [0, 13], [13, 14], [14, 15], [15, 16],
+      [0, 17], [17, 18], [18, 19], [19, 20],
+      [5, 9], [9, 13], [13, 17]
+    ];
+
+    function preload() {
+
+      handPose = ml5.handPose({
+        flipped: true,
+        maxHands: 1
+      });
+
+    }
+
+    function gotHands(results) {
+      hands = results;
+    }
+
+    function setup() {
+
+      createCanvas(windowWidth, windowHeight);
+
+      capture = createCapture(
+        {
+          video: {
+            facingMode: "user"
+          },
+          audio: false
+        }
+      );
+
+      capture.size(1280, 720);
+
+      capture.hide();
+
+      capture.elt.onloadeddata = () => {
+
+        console.log("camera ready");
+
+        handPose.detectStart(capture, gotHands);
+
+      };
+
+    }
+
+    function draw() {
+
+      background('#0f172a');
+
+      if (!capture || !capture.loadedmetadata) {
+        drawLoading();
+        return;
+      }
+
+      drawCamera();
+
+      if (hands.length > 0) {
+
+        let hand = hands[0];
+
+        drawSkeleton(hand);
+
+        let gesture = checkGesture(hand);
+
+        drawGestureUI(gesture);
+
+      } else {
+
+        drawNoHandMessage();
+
+      }
+
+    }
+
+    function drawLoading() {
+
+      fill(255);
+
+      noStroke();
+
+      textAlign(CENTER, CENTER);
+
+      textSize(28);
+
+      text("啟動攝影機中...", width / 2, height / 2);
+
+    }
+
+    function drawCamera() {
+
+      let ratio = capture.width / capture.height;
+
+      let camW = width * 0.72;
+
+      let camH = camW / ratio;
+
+      if (camH > height * 0.8) {
+
+        camH = height * 0.8;
+
+        camW = camH * ratio;
+
+      }
+
+      let x = width / 2 - camW / 2;
+
+      let y = height / 2 - camH / 2;
+
+      push();
+
+      drawingContext.shadowBlur = 40;
+      drawingContext.shadowColor = 'rgba(0,0,0,0.5)';
+
+      fill(255);
+
+      noStroke();
+
+      rect(
+        x - 10,
+        y - 10,
+        camW + 20,
+        camH + 20,
+        28
+      );
+
+      pop();
+
+      push();
+
+      translate(x + camW, y);
+
+      scale(-1, 1);
+
+      image(
+        capture,
+        0,
+        0,
+        camW,
+        camH
+      );
+
+      pop();
+
+      window.camData = {
+        x,
+        y,
+        camW,
+        camH
+      };
+
+    }
+
+    function drawSkeleton(hand) {
+
+      let k = hand.keypoints;
+
+      let {
+        x,
+        y,
+        camW,
+        camH
+      } = window.camData;
+
+      let sx = camW / capture.width;
+      let sy = camH / capture.height;
+
+      strokeWeight(5);
+
+      stroke('#60a5fa');
+
+      for (let pair of connections) {
+
+        let p1 = k[pair[0]];
+        let p2 = k[pair[1]];
+
+        line(
+          x + (capture.width - p1.x) * sx,
+          y + p1.y * sy,
+
+          x + (capture.width - p2.x) * sx,
+          y + p2.y * sy
+        );
+
+      }
+
+      noStroke();
+
+      for (let kp of k) {
+
+        fill('#ffffff');
+
+        drawingContext.shadowBlur = 20;
+        drawingContext.shadowColor = '#3b82f6';
+
+        circle(
+          x + (capture.width - kp.x) * sx,
+          y + kp.y * sy,
+          14
+        );
+
+      }
+
+    }
+
+    function drawGestureUI(gesture) {
+
+      fill(255);
+
+      noStroke();
+
+      textAlign(CENTER, CENTER);
+
+      textSize(54);
+
+      textStyle(BOLD);
+
+      text(
+        gesture,
+        width / 2,
+        90
+      );
+
+    }
+
+    function drawNoHandMessage() {
+
+      fill(255, 120);
+
+      noStroke();
+
+      textAlign(CENTER, CENTER);
+
+      textSize(28);
+
+      text(
+        '請把手放進鏡頭內',
+        width / 2,
+        90
+      );
+
+    }
+
+    function checkGesture(hand) {
+
+      let k = hand.keypoints;
+
+      let index =
+        dist(k[0].x, k[0].y, k[8].x, k[8].y) >
+        dist(k[0].x, k[0].y, k[6].x, k[6].y);
+
+      let middle =
+        dist(k[0].x, k[0].y, k[12].x, k[12].y) >
+        dist(k[0].x, k[0].y, k[10].x, k[10].y);
+
+      let ring =
+        dist(k[0].x, k[0].y, k[16].x, k[16].y) >
+        dist(k[0].x, k[0].y, k[14].x, k[14].y);
+
+      let pinky =
+        dist(k[0].x, k[0].y, k[20].x, k[20].y) >
+        dist(k[0].x, k[0].y, k[18].x, k[18].y);
+
+      if (index && middle && ring && pinky) {
+        return '✋ PAPER';
+      }
+
+      if (index && middle && !ring && !pinky) {
+        return '✌️ SCISSORS';
+      }
+
+      if (!index && !middle && !ring && !pinky) {
+        return '✊ ROCK';
+      }
+
+      return '偵測中...';
+
+    }
+
+    function windowResized() {
+
+      resizeCanvas(
+        windowWidth,
+        windowHeight
+      );
+
+    }
+
+  </script>
 
 </body>
+
 </html>
