@@ -1,27 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Sketch</title>
+  <title>HandPose RPS</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-    </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
 
-    <script src="libraries/p5.min.js"></script>
-    <script src="libraries/p5.sound.min.js"></script>
-    <!-- 引入 ml5.js 用於手部辨識 -->
-    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
-  </head>
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: #0f172a;
+      font-family: Arial, sans-serif;
+    }
 
-  <body>
-    <script src="sketch.js"></script>
-  </body>
+    canvas {
+      display: block;
+    }
+
+    .title {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 2px;
+
+      z-index: 10;
+    }
+
+    .panel {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 320px;
+      padding: 20px;
+
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+
+      color: white;
+      text-align: center;
+
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">HandPose Rock Paper Scissors</div>
+
+  <div class="panel">
+    用手勢出拳：
+    <br><br>
+    ✊ 石頭
+    ✌️ 剪刀
+    ✋ 布
+  </div>
+
+  <script src="sketch.js"></script>
+
+</body>
 </html>
